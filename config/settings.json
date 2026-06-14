@@ -2,40 +2,46 @@
   "data_sources": {
     "tickets": {
       "enabled": true,
-      "api_endpoint": "YOUR_TICKET_API",
-      "auth_token": "YOUR_TOKEN",
+      "mcp_server": "mcp-now",
+      "superset_dataset_id": 2652,
+      "superset_dataset_name": "[Ticket] Ticket List",
+      "superset_chart_id": 5978,
       "days_lookback": 15
     },
     "telegram": {
       "enabled": true,
-      "api_endpoint": "YOUR_TG_API",
-      "channel_id": "YOUR_CHANNEL_ID",
-      "days_lookback": 15
+      "mcp_server": "mcp-now",
+      "superset_dataset_id": 2459,
+      "superset_dataset_name": "[客户360]Telegram聊天记录",
+      "note": "当前无专属图表，SQL 权限受限，需联系管理员授权"
     },
     "langfuse": {
       "enabled": true,
-      "api_endpoint": "YOUR_LANGFUSE_API",
-      "project_id": "YOUR_PROJECT_ID",
-      "days_lookback": 15
+      "mcp_server": "mcp-now",
+      "superset_dataset_id": 2812,
+      "superset_dataset_name": "[PortalAgent] Langfuse Record - Prod & Dev",
+      "superset_chart_ids": [6111, 6108],
+      "note": "chart 6111=Agent分布, chart 6108=会话趋势"
     }
   },
   "analysis": {
-    "claude_model": "claude-sonnet-4-6",
-    "max_tokens": 16000,
-    "use_prompt_caching": true
+    "claude_model": "claude-sonnet-4-5@20250929",
+    "voc_framework": ["概念困扰", "能力缺口", "产品残留问题"],
+    "priority_threshold": "P1",
+    "min_frequency_for_attention": 3
   },
   "phabricator": {
+    "mcp_server": "mcp-now",
+    "mcp_tool": "mcp__mcp-now__pha_task_create",
     "base_url": "https://pha.1cobo.com",
-    "use_mcp": true,
-    "auto_create_tasks": true,
-    "priority_threshold": "P0/P1"
+    "auto_create_tasks": true
   },
   "output": {
     "report_dir": "/Users/yin.wang/Desktop/VOC产品洞察分析工具",
-    "report_format": ["markdown", "excel"]
+    "report_format": ["excel"]
   },
   "schedule": {
-    "cron": "0 9 * * 1",
-    "description": "Weekly VOC analysis"
+    "cron": "0 10 * * 1",
+    "description": "每周一早上 10:00 自动执行 VOC 分析"
   }
 }
