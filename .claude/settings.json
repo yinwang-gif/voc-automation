@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__mcp-now__search_tools",
+      "mcp__mcp-now__call_tool",
+      "mcp__mcp-now__health_check",
+      "mcp__mcp-now__get_instance_info",
+      "mcp__mcp-now__pha_task_create",
+      "mcp__mcp-now__pha_task_get",
+      "mcp__mcp-now__pha_task_search_advanced",
+      "mcp__mcp-now__pha_user_whoami",
+      "mcp__mcp-now__pha_project_search"
+    ]
+  }
+}

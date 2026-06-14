@@ -1,0 +1,41 @@
+{
+  "data_sources": {
+    "tickets": {
+      "enabled": true,
+      "api_endpoint": "YOUR_TICKET_API",
+      "auth_token": "YOUR_TOKEN",
+      "days_lookback": 15
+    },
+    "telegram": {
+      "enabled": true,
+      "api_endpoint": "YOUR_TG_API",
+      "channel_id": "YOUR_CHANNEL_ID",
+      "days_lookback": 15
+    },
+    "langfuse": {
+      "enabled": true,
+      "api_endpoint": "YOUR_LANGFUSE_API",
+      "project_id": "YOUR_PROJECT_ID",
+      "days_lookback": 15
+    }
+  },
+  "analysis": {
+    "claude_model": "claude-sonnet-4-6",
+    "max_tokens": 16000,
+    "use_prompt_caching": true
+  },
+  "phabricator": {
+    "base_url": "https://pha.1cobo.com",
+    "use_mcp": true,
+    "auto_create_tasks": true,
+    "priority_threshold": "P0/P1"
+  },
+  "output": {
+    "report_dir": "/Users/yin.wang/Desktop/VOC产品洞察分析工具",
+    "report_format": ["markdown", "excel"]
+  },
+  "schedule": {
+    "cron": "0 9 * * 1",
+    "description": "Weekly VOC analysis"
+  }
+}

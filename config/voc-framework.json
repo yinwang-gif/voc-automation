@@ -1,0 +1,36 @@
+{
+  "categories": [
+    {
+      "type": "concept_confusion",
+      "name": "概念困扰",
+      "description": "用户反复问为什么/怎么理解",
+      "keywords": ["不理解", "为什么", "怎么", "confused", "unclear"]
+    },
+    {
+      "type": "capability_gap",
+      "name": "能力缺口",
+      "description": "用户需要功能，产品没提供",
+      "keywords": ["需要", "希望", "能否", "支持", "feature request"]
+    },
+    {
+      "type": "product_issue",
+      "name": "产品残留问题",
+      "description": "已有功能不好用",
+      "keywords": ["bug", "卡住", "失败", "报错", "不work"]
+    }
+  ],
+  "priority_rules": {
+    "P0": {
+      "conditions": ["频次 >= 5", "影响资金安全", "系统级故障"],
+      "emoji": "🔴"
+    },
+    "P1": {
+      "conditions": ["频次 >= 3", "影响核心流程", "多渠道反馈"],
+      "emoji": "🟡"
+    },
+    "P2": {
+      "conditions": ["频次 < 3", "影响体验", "单一反馈"],
+      "emoji": "🟢"
+    }
+  }
+}
