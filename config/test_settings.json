@@ -4,19 +4,19 @@
       "enabled": true,
       "api_endpoint": "mock://tickets",
       "auth_token": "",
-      "days_lookback": 15
+      "days_lookback": 8
     },
     "telegram": {
       "enabled": true,
       "api_endpoint": "mock://telegram",
       "channel_id": "test-channel",
-      "days_lookback": 15
+      "days_lookback": 8
     },
     "langfuse": {
       "enabled": true,
       "api_endpoint": "mock://langfuse",
       "project_id": "test-project",
-      "days_lookback": 15
+      "days_lookback": 8
     }
   },
   "analysis": {

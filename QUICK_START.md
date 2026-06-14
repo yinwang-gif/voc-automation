@@ -9,7 +9,7 @@
 ```
 帮我执行 VOC 自动化分析：
 
-1. 通过 MCP 拉取最近 15 天的数据：
+1. 通过 MCP 拉取最近 8 天的数据：
    - 工单数据：dataset ID 2652 ([Ticket] Ticket List)，chart 5978
    - TG 消息：dataset ID 2459 ([客户360]Telegram聊天记录)
    - AI 对话：dataset ID 2812 ([PortalAgent] Langfuse Record - Prod & Dev)，charts 6111, 6108

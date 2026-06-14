@@ -27,7 +27,7 @@ class TicketCollector:
         self.enabled = bool(source_config.get("enabled", True))
         self.api_endpoint = source_config.get("api_endpoint", "")
         self.auth_token = source_config.get("auth_token") or os.getenv("TICKET_API_TOKEN", "")
-        self.days_lookback = int(source_config.get("days_lookback", 15))
+        self.days_lookback = int(source_config.get("days_lookback", 8))
         self.timeout = int(source_config.get("timeout", 30))
 
     def collect(self) -> pd.DataFrame:

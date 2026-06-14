@@ -6,7 +6,7 @@
       "superset_dataset_id": 2652,
       "superset_dataset_name": "[Ticket] Ticket List",
       "superset_chart_id": 5978,
-      "days_lookback": 15
+      "days_lookback": 8
     },
     "telegram": {
       "enabled": true,

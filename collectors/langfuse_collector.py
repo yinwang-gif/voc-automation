@@ -18,7 +18,7 @@ class LangfuseCollector:
         self.enabled = bool(source_config.get("enabled", True))
         self.api_endpoint = source_config.get("api_endpoint", "")
         self.project_id = source_config.get("project_id", "")
-        self.days_lookback = int(source_config.get("days_lookback", 15))
+        self.days_lookback = int(source_config.get("days_lookback", 8))
         self.api_key = source_config.get("api_key") or os.getenv("LANGFUSE_API_KEY", "")
         self.timeout = int(source_config.get("timeout", 30))
 

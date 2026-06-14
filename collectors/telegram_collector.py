@@ -18,7 +18,7 @@ class TelegramCollector:
         self.enabled = bool(source_config.get("enabled", True))
         self.api_endpoint = source_config.get("api_endpoint", "")
         self.channel_id = source_config.get("channel_id", "")
-        self.days_lookback = int(source_config.get("days_lookback", 15))
+        self.days_lookback = int(source_config.get("days_lookback", 8))
         self.bot_token = source_config.get("bot_token") or os.getenv("TELEGRAM_BOT_TOKEN", "")
         self.timeout = int(source_config.get("timeout", 30))
 

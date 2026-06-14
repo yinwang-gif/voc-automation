@@ -20,7 +20,7 @@
 
 ```sql
 -- 在 Claude Code 中说：
-帮我执行 SQL 查询，拉取最近 15 天的工单数据：
+帮我执行 SQL 查询，拉取最近 8 天的工单数据：
 
 SELECT 
     id,
@@ -44,7 +44,7 @@ ORDER BY created_at DESC
 
 ```sql
 -- 在 Claude Code 中说：
-帮我执行 SQL 查询，拉取最近 15 天的 TG 消息：
+帮我执行 SQL 查询，拉取最近 8 天的 TG 消息：
 
 SELECT 
     message_id,
@@ -66,7 +66,7 @@ ORDER BY timestamp DESC
 
 ```sql
 -- 在 Claude Code 中说：
-帮我执行 SQL 查询，拉取最近 15 天的 AI 对话摘要：
+帮我执行 SQL 查询，拉取最近 8 天的 AI 对话摘要：
 
 SELECT 
     conversation_id,
@@ -140,7 +140,7 @@ LIMIT 100
 ```text
 帮我执行 VOC 自动化分析：
 
-1. 通过 Superset MCP 拉取最近 15 天的数据：
+1. 通过 Superset MCP 拉取最近 8 天的数据：
    - 工单：execute_sql 查询 tickets 表
    - TG 消息：execute_sql 查询 telegram_messages 表
    - AI 对话：execute_sql 查询 langfuse_conversations 表
