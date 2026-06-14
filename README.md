@@ -1,126 +1,91 @@
 # VOC 自动化分析工具
 
-定期自动收集 VOA/VOC 数据，进行 AI 分析，生成 Markdown / Excel 报告，并将 P0/P1 优先建议输出为待执行的 Phabricator task 清单。
+每周一 10:00 自动通过 MCP 拉取工单/Telegram/Langfuse 数据 → Claude 分析 → 生成 Excel 周报 → 创建 Phabricator Task，全程无需人工干预。
 
-## 目录结构
+## 工作方式
 
-```text
-voc-automation/
-├── config/
-│   ├── settings.json
-│   ├── test_settings.json
-│   └── voc-framework.json
-├── collectors/
-├── analyzers/
-├── reporters/
-├── integrations/
-├── scheduler/
-├── skills/voc-automation.skill/
-├── tests/
-├── main.py
-└── requirements.txt
+```
+launchctl 定时触发 (周一 10:00)
+  → notify_voc_analysis.sh
+    → claude -p --permission-mode bypassPermissions
+      → MCP (Superset) 拉数据
+      → Claude 按 VOC 框架分析
+      → 生成 Excel 周报 (4 Sheet)
+      → MCP (Phabricator) 创建 P0/P1 Task
 ```
 
-## 安装
+全程通过 MCP Server (`mcp-now`)，无需配置数据源 API。
+
+## 快速安装
 
 ```bash
-cd /Users/yin.wang/voc-automation
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
+git clone https://github.com/yinwang-gif/voc-automation.git
+cd voc-automation
+./setup.sh
 ```
 
-在 `.env` 中填写：
+setup.sh 自动完成：检查 Claude Code CLI → 配置 API Key → 安装 launchctl 定时任务。
+
+## 前置条件
+
+- Claude Code CLI 已安装 (`npm install -g @anthropic-ai/claude-code`)
+- `mcp-now` MCP Server 已配置（包含 Superset + Phabricator 连接）
+- API Key：`ANTHROPIC_AUTH_TOKEN` 和 `ANTHROPIC_BASE_URL` 环境变量（setup.sh 会引导填写）
+
+## 数据源（全部通过 MCP）
+
+| 数据源 | MCP Server | Superset Dataset | Chart |
+|--------|-----------|-----------------|-------|
+| 工单 | mcp-now | 2652 ([Ticket] Ticket List) | 5978 |
+| TG 消息 | mcp-now | 2459 ([客户360]Telegram聊天记录) | - |
+| AI 对话 | mcp-now | 2812 ([PortalAgent] Langfuse Record) | 6111, 6108 |
+
+详细配置见 `config/settings.json`。
+
+## 输出
+
+每周一执行后在 `~/Desktop/VOC产品洞察分析工具/` 生成：
+
+```
+VOC_周报_YYYY-MM-DD.xlsx
+```
+
+Excel 包含 4 个 Sheet：
+
+| Sheet | 内容 |
+|-------|------|
+| 数据概览 | 数据源名称、拉取数量、状态 |
+| VOC 分析 | 问题分类、描述、频次、优先级、改进建议 |
+| 原始依据 | 工单原文、TG 消息原文、用户原话摘录 |
+| PHA Tasks | Task 编号、标题、优先级、Phabricator 链接、状态 |
+
+## 手动测试
 
 ```bash
-ANTHROPIC_API_KEY=your_claude_api_key
-TICKET_API_TOKEN=your_ticket_api_token
-TELEGRAM_BOT_TOKEN=your_tg_bot_token
-LANGFUSE_API_KEY=your_langfuse_key
+./notify_voc_analysis.sh
 ```
 
-## 配置
+## 管理定时任务
+
+```bash
+# 查看状态
+launchctl list | grep voc-analysis
+
+# 停止
+launchctl unload ~/Library/LaunchAgents/com.user.voc-analysis.plist
+
+# 重新启动
+launchctl load ~/Library/LaunchAgents/com.user.voc-analysis.plist
+```
+
+## 配置说明
 
 编辑 `config/settings.json`：
 
-- `data_sources.tickets.api_endpoint`：工单 API
-- `data_sources.telegram.api_endpoint`：TG 消息 API
-- `data_sources.langfuse.api_endpoint`：Langfuse 数据 API
-- `output.report_dir`：报告输出目录，默认 `/Users/yin.wang/Desktop/VOC产品洞察分析工具`
-- `phabricator.priority_threshold`：默认只为 P0/P1 创建待处理 task
-
-## 手动执行
-
-```bash
-cd /Users/yin.wang/voc-automation
-python main.py
-```
-
-测试配置可以这样运行：
-
-```bash
-python main.py --config config/test_settings.json
-```
-
-## Claude Code 中使用
-
-```text
-帮我执行 VOC 自动化：
-1. 运行 /Users/yin.wang/voc-automation/main.py
-2. 读取生成的 pending_pha_tasks.json
-3. 调用 MCP 工具创建所有 Phabricator task
-```
-
-Skill 入口位于：
-
-```text
-skills/voc-automation.skill/skill.py
-```
-
-## 输出文件
-
-运行完成后，`output.report_dir` 下会生成：
-
-- `VOC_分析报告_YYYYMMDD.md`
-- `VOC_分析结论表_YYYYMMDD.xlsx`
-- `执行摘要_YYYYMMDD.txt`
-- `pending_pha_tasks.json`
-
-`pending_pha_tasks.json` 会保存类似：
-
-```json
-[
-  {
-    "tool": "mcp__mcp-now__pha_task_create",
-    "params": {
-      "title": "问题标题",
-      "description": "详细描述"
-    },
-    "status": "pending",
-    "created_at": "2026-06-14T10:00:00"
-  }
-]
-```
-
-## 定时执行
-
-在 Claude Code 中创建定时任务：
-
-```text
-帮我设置一个定时任务，每周一早上 9 点运行 /Users/yin.wang/voc-automation/main.py
-```
-
-或使用 skill：
-
-```bash
-/schedule --cron "0 9 * * 1" --prompt "/voc-automation" --description "每周一早上9点执行VOC分析"
-```
-
-## 测试
-
-```bash
-pytest -q
-```
-
-测试使用 `config/test_settings.json` 和 mock 数据，不会调用真实外部 API。
+- `data_sources.*.superset_dataset_id` — 各数据源对应的 Superset Dataset ID
+- `data_sources.*.superset_chart_id` — 预建的 Superset Chart ID
+- `analysis.voc_framework` — VOC 分析框架（概念困扰/能力缺口/产品残留问题）
+- `analysis.min_frequency_for_attention` — 触发关注的最低频次阈值
+- `phabricator.mcp_tool` — 创建 Task 的 MCP 工具名
+- `output.report_dir` — 报告输出目录
+- `schedule.cron` — 定时规则（当前：每周一 10:00）
