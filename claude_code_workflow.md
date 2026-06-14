@@ -222,7 +222,7 @@ mcp__mcp-now__list_datasets
 ### 方式 2: 手动触发
 每周在 Claude Code 中说：
 ```
-执行 VOC 分析（按照 /Users/yin.wang/voc-automation/claude_code_workflow.md）
+执行 VOC 分析（按照 voc-automation/claude_code_workflow.md）
 ```
 
 ---

@@ -2,7 +2,8 @@
 # VOC 自动化分析 - 全自动执行脚本
 # 每周一 10:00 由 launchctl 触发
 
-LOG_DIR="/Users/yin.wang/voc-automation/logs"
+PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
+LOG_DIR="$PROJECT_DIR/logs"
 LOG_FILE="$LOG_DIR/reminder.log"
 ERR_FILE="$LOG_DIR/reminder.error.log"
 
@@ -15,17 +16,17 @@ osascript -e 'display notification "正在拉取数据、分析、创建 PHA Tas
 
 # 本周一的日期，作为文件名
 REPORT_DATE=$(date '+%Y-%m-%d')
-REPORT_DIR="/Users/yin.wang/Desktop/VOC产品洞察分析工具"
+REPORT_DIR="$HOME/Desktop/VOC产品洞察分析工具"
 REPORT_FILE="$REPORT_DIR/VOC_周报_${REPORT_DATE}.xlsx"
 
 mkdir -p "$REPORT_DIR"
 
 # 加载 shell 环境并执行分析（zsh 会 source .zshrc/.zshenv）
 /usr/bin/env zsh -l -c "
-cd /Users/yin.wang/voc-automation
+cd "$PROJECT_DIR"
 
 claude -p --permission-mode bypassPermissions '
-读取 /Users/yin.wang/voc-automation/QUICK_START.md 并执行完整 VOC 分析流程，包括：
+读取 '"$PROJECT_DIR"'/QUICK_START.md 并执行完整 VOC 分析流程，包括：
 
 - 通过 MCP 拉取数据（工单/Telegram/Langfuse）
 - 按 VOC 框架分析

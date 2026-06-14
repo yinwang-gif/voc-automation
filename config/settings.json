@@ -37,7 +37,7 @@
     "auto_create_tasks": true
   },
   "output": {
-    "report_dir": "/Users/yin.wang/Desktop/VOC产品洞察分析工具",
+    "report_dir": "~/Desktop/VOC产品洞察分析工具",
     "report_format": ["excel"]
   },
   "schedule": {
