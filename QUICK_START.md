@@ -20,11 +20,18 @@
    - 评估优先级（P0/P1/P2）
    - 与历史 VOC 对比
 
-3. 生成 Excel 报告，包含 4 个 Sheet：
-   - 数据概览 / VOC 分析 / 原始依据 / PHA Tasks
+3. 对每个 P0/P1 问题运行产品决策（调用 product-owner-decision skill）：
+   - 产出决策：explore / prototype / pilot / enter_prd / pause / stop
+   - 给出：决策理由、证据分级、下一步、先别做、是否高风险域
+   - 约束：单条反馈不等于已验证需求；高风险域（资金/钱包/签名/KYC/合规/客户数据/对客 ROI）未评审时不得 pilot 或 enter_prd
 
-4. 创建 Phabricator Tasks（P0/P1）：
+4. 生成 Excel 报告，包含 5 个 Sheet：
+   - 数据概览 / VOC 分析 / 原始依据 / 产品决策 / PHA Tasks
+   - 「VOC 分析」增加一列「产品决策」便于对照
+
+5. 创建 Phabricator Tasks（P0/P1）：
    - 使用 mcp__mcp-now__pha_task_create
+   - task 描述中附「产品决策建议」（决策 + 下一步 + 先别做 + 高风险提示）
    - 显示创建的 task 链接
 
 全程自动执行，不需要问我确认。
@@ -66,8 +73,9 @@ launchctl load ~/Library/LaunchAgents/com.user.voc-analysis.plist
 Claude Code 自动执行：
   1. MCP 拉取数据（Superset）
   2. VOC 框架分析
-  3. 生成 Excel 报告（4 Sheet）
-  4. MCP 创建 Phabricator Tasks
+  3. 对 P0/P1 跑产品决策（product-owner-decision skill）
+  4. 生成 Excel 报告（5 Sheet）
+  5. MCP 创建 Phabricator Tasks（附决策建议）
    ↓
 系统通知："✅ VOC 周报分析完成"
    ↓

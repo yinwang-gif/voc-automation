@@ -28,7 +28,13 @@
     "claude_model": "claude-sonnet-4-5@20250929",
     "voc_framework": ["概念困扰", "能力缺口", "产品残留问题"],
     "priority_threshold": "P1",
-    "min_frequency_for_attention": 3
+    "min_frequency_for_attention": 3,
+    "product_decision": {
+      "enabled": true,
+      "apply_to_priorities": ["P0", "P1"],
+      "skill_path": "skills/product-owner-decision",
+      "max_tokens": 8000
+    }
   },
   "phabricator": {
     "mcp_server": "mcp-now",

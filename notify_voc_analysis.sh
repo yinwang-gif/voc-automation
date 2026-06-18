@@ -30,14 +30,16 @@ claude -p --permission-mode bypassPermissions '
 
 - 通过 MCP 拉取数据（工单/Telegram/Langfuse）
 - 按 VOC 框架分析
-- 创建 Phabricator Tasks
+- 对每个 P0/P1 问题调用 product-owner-decision skill 做产品决策
+- 创建 Phabricator Tasks（task 描述附产品决策建议）
 
 将所有分析结果和 Task 创建结果写入 $REPORT_FILE（Excel 文件），包含以下 Sheet：
 
 Sheet 1「数据概览」：数据源名称、拉取数量、状态、备注
-Sheet 2「VOC 分析」：问题分类（概念困扰/能力缺口/产品残留问题）、具体问题描述、频次、优先级（P0/P1/P2）、数据来源（工单号/TG消息ID）、改进建议
+Sheet 2「VOC 分析」：问题分类（概念困扰/能力缺口/产品残留问题）、具体问题描述、频次、优先级（P0/P1/P2）、数据来源（工单号/TG消息ID）、改进建议、产品决策
 Sheet 3「原始依据」：每条问题的原始数据原文，包括工单标题和描述原文、TG 消息原文、用户原话摘录，确保每一条分析结论都有据可查
-Sheet 4「PHA Tasks」：Task 编号、标题、优先级、Phabricator 链接、创建状态
+Sheet 4「产品决策」：问题标题、决策（explore/prototype/pilot/enter_prd/pause/stop）、决策理由、下一步、先别做、是否高风险域
+Sheet 5「PHA Tasks」：Task 编号、标题、优先级、Phabricator 链接、创建状态
 
 全程自动执行，不需要问我确认。
 '

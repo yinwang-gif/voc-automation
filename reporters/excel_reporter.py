@@ -30,6 +30,10 @@ class ExcelReporter:
         """构建数据表。"""
         rows = []
         for issue in result.get("issues", []):
+            decision = issue.get("product_decision") or {}
+            decision_text = (
+                f"{decision.get('decision', '')}（{decision.get('decision_label', '')}）" if decision else ""
+            )
             rows.append(
                 {
                     "优先级": issue.get("priority", ""),
@@ -39,9 +43,19 @@ class ExcelReporter:
                     "数据来源": ", ".join(issue.get("data_sources", [])),
                     "问题描述": issue.get("description", ""),
                     "建议操作": "\n".join(issue.get("suggestions", [])),
+                    "产品决策": decision_text,
+                    "决策理由": decision.get("rationale", ""),
+                    "下一步": "\n".join(decision.get("do_next", [])),
+                    "先别做": "\n".join(decision.get("do_not_yet", [])),
                 }
             )
-        return pd.DataFrame(rows, columns=["优先级", "问题类型", "问题标题", "频次", "数据来源", "问题描述", "建议操作"])
+        return pd.DataFrame(
+            rows,
+            columns=[
+                "优先级", "问题类型", "问题标题", "频次", "数据来源", "问题描述", "建议操作",
+                "产品决策", "决策理由", "下一步", "先别做",
+            ],
+        )
 
     def _apply_formatting(self, worksheet) -> None:
         if worksheet.max_row < 1:
@@ -64,6 +78,10 @@ class ExcelReporter:
             "E": 24,
             "F": 48,
             "G": 48,
+            "H": 16,
+            "I": 40,
+            "J": 36,
+            "K": 30,
         }
         for col, width in widths.items():
             worksheet.column_dimensions[col].width = width

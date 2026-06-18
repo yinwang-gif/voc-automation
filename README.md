@@ -1,6 +1,6 @@
 # VOC 自动化分析工具
 
-每周一 10:00 自动通过 MCP 拉取工单/Telegram/Langfuse 数据 → Claude 分析 → 生成 Excel 周报 → 创建 Phabricator Task，全程无需人工干预。
+每周一 10:00 自动通过 MCP 拉取工单/Telegram/Langfuse 数据 → Claude 按 VOC 框架分析 → 对 P0/P1 问题跑产品决策 → 生成 Excel 周报 → 创建 Phabricator Task，全程无需人工干预。
 
 ## 工作方式
 
@@ -10,8 +10,9 @@ launchctl 定时触发 (周一 10:00)
     → claude -p --permission-mode bypassPermissions
       → MCP (Superset) 拉数据
       → Claude 按 VOC 框架分析
-      → 生成 Excel 周报 (4 Sheet)
-      → MCP (Phabricator) 创建 P0/P1 Task
+      → 对 P0/P1 跑产品决策 (product-owner-decision skill)
+      → 生成 Excel 周报 (5 Sheet)
+      → MCP (Phabricator) 创建 P0/P1 Task (附决策建议)
 ```
 
 全程通过 MCP Server (`mcp-now`)，无需配置数据源 API。
@@ -50,14 +51,25 @@ setup.sh 自动完成：检查 Claude Code CLI → 配置 API Key → 安装 lau
 VOC_周报_YYYY-MM-DD.xlsx
 ```
 
-Excel 包含 4 个 Sheet：
+Excel 包含 5 个 Sheet：
 
 | Sheet | 内容 |
 |-------|------|
 | 数据概览 | 数据源名称、拉取数量、状态 |
-| VOC 分析 | 问题分类、描述、频次、优先级、改进建议 |
+| VOC 分析 | 问题分类、描述、频次、优先级、改进建议、产品决策 |
 | 原始依据 | 工单原文、TG 消息原文、用户原话摘录 |
+| 产品决策 | 决策（explore/prototype/pilot/enter_prd/pause/stop）、理由、下一步、先别做、高风险标记 |
 | PHA Tasks | Task 编号、标题、优先级、Phabricator 链接、状态 |
+
+## 产品决策（Product Owner Decision）
+
+VOC 识别出问题后，对 P0/P1 问题自动运行 [product-owner-decision](skills/product-owner-decision/) skill，把「问题 + 改进建议」升级为带证据的决策：
+
+- 决策结论：`explore` / `prototype` / `pilot` / `enter_prd` / `pause` / `stop`
+- 附带：决策理由、证据分级、下一步、先别做、高风险标记
+- 守门：单条反馈不等于已验证需求；资金/钱包/签名/KYC/合规等高风险域未评审时不会建议试点或进入 PRD
+
+决策结果写入 Excel「产品决策」Sheet、Markdown 报告，并附到对应 Phabricator task 描述中。可在 `config/settings.json` 的 `analysis.product_decision.enabled` 关闭。
 
 ## 手动测试
 
@@ -86,6 +98,9 @@ launchctl load ~/Library/LaunchAgents/com.user.voc-analysis.plist
 - `data_sources.*.superset_chart_id` — 预建的 Superset Chart ID
 - `analysis.voc_framework` — VOC 分析框架（概念困扰/能力缺口/产品残留问题）
 - `analysis.min_frequency_for_attention` — 触发关注的最低频次阈值
+- `analysis.product_decision.enabled` — 是否对高优问题运行产品决策（默认 true）
+- `analysis.product_decision.apply_to_priorities` — 跑决策的优先级（默认 ["P0","P1"]）
+- `analysis.product_decision.skill_path` — product-owner-decision skill 目录（默认项目内 skills/ 副本）
 - `phabricator.mcp_tool` — 创建 Task 的 MCP 工具名
 - `output.report_dir` — 报告输出目录
 - `schedule.cron` — 定时规则（当前：每周一 10:00）

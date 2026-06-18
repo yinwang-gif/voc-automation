@@ -23,7 +23,11 @@
     "claude_model": "claude-sonnet-4-6",
     "max_tokens": 16000,
     "use_prompt_caching": true,
-    "mock_analysis": true
+    "mock_analysis": true,
+    "product_decision": {
+      "enabled": true,
+      "apply_to_priorities": ["P0", "P1"]
+    }
   },
   "phabricator": {
     "base_url": "https://pha.1cobo.com",

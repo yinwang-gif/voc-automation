@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import json
+from collections import Counter
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict
 
+from analyzers.decision_analyzer import DecisionAnalyzer
 from analyzers.voc_analyzer import VOCAnalyzer
 from collectors.langfuse_collector import LangfuseCollector
 from collectors.telegram_collector import TelegramCollector
@@ -30,6 +32,7 @@ class WorkflowRunner:
         self.telegram_collector = TelegramCollector(self.config)
         self.langfuse_collector = LangfuseCollector(self.config)
         self.analyzer = VOCAnalyzer(self.config, self.voc_framework)
+        self.decision_analyzer = DecisionAnalyzer(self.config)
         self.md_reporter = MarkdownReporter(self.config)
         self.excel_reporter = ExcelReporter(self.config)
         self.pha_client = PhabricatorClient(self.config)
@@ -39,7 +42,7 @@ class WorkflowRunner:
         print("🚀 开始 VOC 自动化分析...")
 
         try:
-            print("📊 步骤 1/5: 收集数据...")
+            print("📊 步骤 1/6: 收集数据...")
             raw_data = {
                 "tickets": self.ticket_collector.collect(),
                 "telegram": self.telegram_collector.collect(),
@@ -50,21 +53,31 @@ class WorkflowRunner:
             print(f"   ✓ 工单: {len(raw_data['tickets'])} 条")
             print(f"   ✓ TG: {len(raw_data['telegram'])} 条")
 
-            print("🤖 步骤 2/5: AI 分析中...")
+            print("🤖 步骤 2/6: AI 分析中...")
             analysis_result = self.analyzer.analyze(raw_data)
             print(f"   ✓ 识别问题: {len(analysis_result['issues'])} 个")
 
-            print("📝 步骤 3/5: 生成报告...")
+            print("🧭 步骤 3/6: 产品决策（Product Owner Decision）...")
+            if self.decision_analyzer.enabled:
+                self.decision_analyzer.decide_issues(
+                    analysis_result["issues"], context=analysis_result.get("summary")
+                )
+                decided = [i for i in analysis_result["issues"] if i.get("product_decision")]
+                print(f"   ✓ 完成 {len(decided)} 个高优问题的产品决策")
+            else:
+                print("   - 已跳过（analysis.product_decision.enabled = false）")
+
+            print("📝 步骤 4/6: 生成报告...")
             md_path = self.md_reporter.generate(analysis_result)
             excel_path = self.excel_reporter.generate(analysis_result)
             print(f"   ✓ Markdown: {md_path}")
             print(f"   ✓ Excel: {excel_path}")
 
-            print("🎫 步骤 4/5: 创建 Phabricator tasks...")
+            print("🎫 步骤 5/6: 创建 Phabricator tasks...")
             created_tasks = self.pha_client.create_tasks_from_issues(analysis_result["issues"])
             print(f"   ✓ 创建 {len(created_tasks)} 个 task")
 
-            print("✅ 步骤 5/5: 生成执行摘要...")
+            print("✅ 步骤 6/6: 生成执行摘要...")
             summary = self._generate_summary(analysis_result, created_tasks, md_path, excel_path)
             output_dir = Path(self.config.get("output", {}).get("report_dir", ".")).expanduser()
             output_dir.mkdir(parents=True, exist_ok=True)
@@ -87,8 +100,21 @@ class WorkflowRunner:
     def _format_task_list(self, tasks: list) -> str:
         return chr(10).join([f"- {t['issue']}: {t['task_url']}" for t in tasks])
 
+    def _format_decision_distribution(self, decided: list) -> str:
+        """汇总高优问题的产品决策分布。"""
+        if not decided:
+            return ""
+        counter = Counter(
+            f"{d['product_decision']['decision']}（{d['product_decision'].get('decision_label', '')}）"
+            for d in decided
+        )
+        lines = "\n".join(f"  - {name}: {count} 个" for name, count in counter.items())
+        return f"- 产品决策: 已对 {len(decided)} 个高优问题给出建议\n{lines}"
+
     def _generate_summary(self, analysis: Dict[str, Any], tasks: list, md_path: str, excel_path: str) -> str:
         """生成执行摘要。"""
+        decided = [i for i in analysis["issues"] if i.get("product_decision")]
+        decision_block = self._format_decision_distribution(decided)
         return f"""VOC 自动化分析执行摘要
 {'=' * 50}
 执行时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
@@ -100,7 +126,7 @@ class WorkflowRunner:
   - P0: {len([i for i in analysis['issues'] if i['priority'] == 'P0'])} 个
   - P1: {len([i for i in analysis['issues'] if i['priority'] == 'P1'])} 个
   - P2: {len([i for i in analysis['issues'] if i['priority'] == 'P2'])} 个
-
+{decision_block}
 生成报告:
 - Markdown: {md_path}
 - Excel: {excel_path}

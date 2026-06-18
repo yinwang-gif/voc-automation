@@ -67,7 +67,7 @@ class MarkdownReporter:
 
 **建议操作：**
 {self._format_suggestions(issue.get('suggestions', []))}
-
+{self._format_decision(issue.get('product_decision'))}
 ---
 
 """
@@ -75,3 +75,24 @@ class MarkdownReporter:
     def _format_suggestions(self, suggestions: List[str]) -> str:
         """格式化建议列表。"""
         return "\n".join([f"{i + 1}. {s}" for i, s in enumerate(suggestions)])
+
+    def _format_decision(self, decision: Dict[str, Any]) -> str:
+        """格式化产品决策摘要（无决策时返回空串）。"""
+        if not decision:
+            return ""
+        parts = [
+            f"\n**🧭 产品决策：{decision.get('decision', '')}（{decision.get('decision_label', '')}）**",
+            "",
+            decision.get("rationale", ""),
+        ]
+        if decision.get("high_risk"):
+            parts.append(f"\n**⚠️ 高风险域：** {decision.get('risk_domain') or '需评审'}")
+        do_next = decision.get("do_next", [])
+        if do_next:
+            parts.append("\n**下一步：**")
+            parts.append("\n".join(f"{i + 1}. {s}" for i, s in enumerate(do_next)))
+        do_not = decision.get("do_not_yet", [])
+        if do_not:
+            parts.append("\n**先别做：**")
+            parts.append("\n".join(f"- {s}" for s in do_not))
+        return "\n".join(parts) + "\n"

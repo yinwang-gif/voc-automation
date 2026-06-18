@@ -127,11 +127,37 @@ class PhabricatorClient:
 
 ## 优先级理由
 {issue.get('priority_reason', '根据频次、影响面和业务重要性综合判断。')}
-
+{self._build_decision_section(issue)}
 ---
 **数据来源：** VOC 自动化分析工具
 **分析时间：** {datetime.now().strftime('%Y-%m-%d')}
 """
+
+    def _build_decision_section(self, issue: Dict[str, Any]) -> str:
+        """把产品决策建议追加到 task 描述（无决策时返回空串）。"""
+        decision = issue.get("product_decision")
+        if not decision:
+            return ""
+        lines = [
+            "",
+            "## 产品决策建议（Product Owner Decision）",
+            f"- **决策：{decision.get('decision', '')}（{decision.get('decision_label', '')}）**",
+        ]
+        if decision.get("rationale"):
+            lines.append(f"- 理由：{decision.get('rationale')}")
+        if decision.get("high_risk"):
+            lines.append(
+                f"- ⚠️ 高风险域：{decision.get('risk_domain') or '需评审'}（评审通过前不得进入试点/PRD）"
+            )
+        do_next = decision.get("do_next", [])
+        if do_next:
+            lines.append("- 下一步：")
+            lines.extend(f"  {i + 1}. {s}" for i, s in enumerate(do_next))
+        do_not = decision.get("do_not_yet", [])
+        if do_not:
+            lines.append("- 先别做：")
+            lines.extend(f"  - {s}" for s in do_not)
+        return "\n".join(lines) + "\n"
 
     def _should_create_task(self, issue: Dict[str, Any]) -> bool:
         """判断是否应该创建 task。"""
